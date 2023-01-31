@@ -12,6 +12,11 @@ func (app *application) routes() *httprouter.Router {
 	// If such routes are required, we can use 'pat' instead
 	router := httprouter.New()
 
+	// Custom error handlers
+	router.NotFound = http.HandlerFunc(app.notFound)
+	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowed)
+
+	// Route handlers
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthCheckHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/movies", app.createMovieHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/movies/:id", app.showMovieHandler)
