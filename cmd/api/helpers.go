@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/narinderv/blockbuster/internal/validator"
 )
 
 // Constants for handling incoming requests
@@ -134,4 +136,51 @@ func (app *application) readJsonRequest(w http.ResponseWriter, r *http.Request, 
 	}
 
 	return nil
+}
+
+func (app *application) readString(queryString url.Values, key string, defString string) string {
+
+	// Get the value corresponding to the given key
+	val := queryString.Get(key)
+
+	// If key is not present, return the default value
+	if val == "" {
+		return defString
+	}
+
+	return val
+}
+
+func (app *application) readInt(queryString url.Values, key string, defValue int, val *validator.Validator) int {
+
+	// Get the value corresponding to the given key
+	v := queryString.Get(key)
+
+	// If key is not present, return the default value
+	if v == "" {
+		return defValue
+	}
+
+	// Key is present, try to convert the value into an Integer
+	// In case of failure, add error into the error map and return the default value
+	value, err := strconv.Atoi(v)
+	if err != nil {
+		val.AddError(key, "value must be an integer")
+		return defValue
+	}
+	return value
+}
+
+func (app *application) readCSV(queryString url.Values, key string, defVal []string) []string {
+
+	// Get the value corresponding to the given key
+	v := queryString.Get(key)
+
+	// If key is not present, return the default value
+	if v == "" {
+		return defVal
+	}
+
+	//Key is present. Split the value at "," to get a slice of strings and return it
+	return strings.Split(v, ",")
 }

@@ -18,13 +18,21 @@ func (app *application) routes() *httprouter.Router {
 
 	// Route handlers
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthCheckHandler)
+
+	// Add a new movie
 	router.HandlerFunc(http.MethodPost, "/v1/movies", app.createMovieHandler)
+
+	// View details of a particular movie
 	router.HandlerFunc(http.MethodGet, "/v1/movies/:id", app.showMovieHandler)
-	/*
-		router.HandlerFunc(http.MethodGet, "/v1/movies", app.listMoviesHandler)
-		router.HandlerFunc(http.MethodPut, "/v1/movies/:id", app.editMovieHandler)
-		router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.deleteMovieHandler)
-	*/
+
+	// View list of Movies
+	router.HandlerFunc(http.MethodGet, "/v1/movies", app.listMoviesHandler)
+
+	// Using the PATCH method for partial update of a record
+	router.HandlerFunc(http.MethodPatch, "/v1/movies/:id", app.editMovieHandler)
+	router.HandlerFunc(http.MethodPut, "/v1/movies/:id", app.editMovieHandler)
+
+	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.deleteMovieHandler)
 
 	return router
 }
