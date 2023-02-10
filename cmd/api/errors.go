@@ -5,9 +5,13 @@ import (
 	"net/http"
 )
 
-func (app *application) logError(err error) {
+func (app *application) logError(r *http.Request, err error) {
 
-	app.logger.Println(err)
+	app.logger.PrintError(err, map[string]string{
+		"request_method": r.Method,
+		"request_url":    r.URL.String(),
+	})
+
 }
 
 func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, status int, message interface{}) {
@@ -18,14 +22,14 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 
 	err := app.writeJsonResponse(w, resp, nil, status)
 	if err != nil {
-		app.logError(err)
+		app.logError(r, err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
 func (app *application) serverError(w http.ResponseWriter, r *http.Request, err error) {
 
-	app.logError(err)
+	app.logError(r, err)
 
 	msg := "the server encountered an internal error and could not process your request."
 
@@ -48,7 +52,7 @@ func (app *application) methodNotAllowed(w http.ResponseWriter, r *http.Request)
 
 func (app *application) badRequest(w http.ResponseWriter, r *http.Request, err error) {
 
-	app.logError(err)
+	app.logError(r, err)
 
 	app.errorResponse(w, r, http.StatusBadRequest, err.Error())
 }

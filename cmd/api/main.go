@@ -5,13 +5,13 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/narinderv/blockbuster/internal/data"
+	"github.com/narinderv/blockbuster/internal/jsonlog"
 )
 
 // Database constants
@@ -37,7 +37,7 @@ type configuration struct {
 // Common information for all handlers
 type application struct {
 	config configuration
-	logger log.Logger
+	logger *jsonlog.Logger
 	models data.Models
 }
 
@@ -57,22 +57,22 @@ func main() {
 	config.dbDetails.maxIdleTime = MAX_IDLE_TIME
 
 	// Create a logger
-	logger := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
 	// Create a database connection
 	dbConn, err := connectToDatabase(config)
 	if err != nil {
-		logger.Fatal(err)
+		logger.PrintFatal(err, nil)
 	}
 
 	defer dbConn.Close()
 
-	logger.Println("Connected to the database")
+	logger.PrintInfo("Connected to the database", nil)
 
 	// Create and fill an application structure instance
 	app := &application{
 		config: config,
-		logger: *logger,
+		logger: logger,
 		models: data.NewModel(dbConn),
 	}
 
@@ -85,11 +85,14 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	logger.Printf("Starting the %s server on port %d", config.env, config.port)
+	logger.PrintInfo("starting server", map[string]string{
+		"addr": httpServer.Addr,
+		"env":  config.env,
+	})
 
 	err = httpServer.ListenAndServe()
 	if err != nil {
-		logger.Fatal(err)
+		logger.PrintFatal(err, nil)
 	}
 }
 

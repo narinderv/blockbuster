@@ -6,7 +6,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (app *application) routes() *httprouter.Router {
+func (app *application) routes() http.Handler {
 	// Using httprouter. Limitation: Does NOT support confilicting routes
 	// e.g. /foo/bar and /foo/:id will not be supported.
 	// If such routes are required, we can use 'pat' instead
@@ -34,5 +34,5 @@ func (app *application) routes() *httprouter.Router {
 
 	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.deleteMovieHandler)
 
-	return router
+	return app.recoverFromPanic(router)
 }
