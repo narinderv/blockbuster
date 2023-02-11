@@ -67,3 +67,8 @@ func (app *application) editConflictError(w http.ResponseWriter, r *http.Request
 	message := "unable to edit record due to an edit conflict. please try again"
 	app.errorResponse(w, r, http.StatusConflict, message)
 }
+
+func (app *application) tpsExceedResponse(w http.ResponseWriter, r *http.Request) {
+	message := "rate limit exceeded"
+	app.errorResponse(w, r, http.StatusTooManyRequests, message)
+}

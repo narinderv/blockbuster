@@ -32,6 +32,12 @@ type configuration struct {
 		maxIdleConns int
 		maxIdleTime  string
 	}
+	// Structure for rate limiting
+	rateLimiter struct {
+		tps        float64
+		burstLimit int
+		enabled    bool
+	}
 }
 
 // Common information for all handlers
@@ -48,7 +54,14 @@ func main() {
 	// Read the port and environment
 	flag.IntVar(&config.port, "port", 8080, "Application server port")
 	flag.StringVar(&config.env, "env", "development", "Current API environment (development|staging|production)")
+
+	// Database details
 	flag.StringVar(&config.dbDetails.dsn, "dsn", "postgres://bbuster:bbuster@localhost/blockbuster?sslmode=disable", "Postgres connection details (postgres://<user>:<pass>@<host/databaseName>)?sslmode=disable")
+
+	// Rate Limiting
+	flag.Float64Var(&config.rateLimiter.tps, "tps", 2, "Transaction per second")
+	flag.IntVar(&config.rateLimiter.burstLimit, "burst", 4, "Max. spike limit")
+	flag.BoolVar(&config.rateLimiter.enabled, "enable-rate-limit", true, "Enable rate limiting")
 
 	flag.Parse()
 
@@ -86,8 +99,11 @@ func main() {
 	}
 
 	logger.PrintInfo("starting server", map[string]string{
-		"addr": httpServer.Addr,
-		"env":  config.env,
+		"addr":    httpServer.Addr,
+		"env":     config.env,
+		"tps":     fmt.Sprintf("%f", config.rateLimiter.tps),
+		"burst":   fmt.Sprintf("%d", config.rateLimiter.burstLimit),
+		"enabled": fmt.Sprintf("%v", config.rateLimiter.enabled),
 	})
 
 	err = httpServer.ListenAndServe()
