@@ -98,15 +98,7 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	logger.PrintInfo("starting server", map[string]string{
-		"addr":    httpServer.Addr,
-		"env":     config.env,
-		"tps":     fmt.Sprintf("%f", config.rateLimiter.tps),
-		"burst":   fmt.Sprintf("%d", config.rateLimiter.burstLimit),
-		"enabled": fmt.Sprintf("%v", config.rateLimiter.enabled),
-	})
-
-	err = httpServer.ListenAndServe()
+	err = app.startServer()
 	if err != nil {
 		logger.PrintFatal(err, nil)
 	}
