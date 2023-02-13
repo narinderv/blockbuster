@@ -4,8 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"flag"
-	"fmt"
-	"net/http"
 	"os"
 	"time"
 
@@ -87,15 +85,6 @@ func main() {
 		config: config,
 		logger: logger,
 		models: data.NewModel(dbConn),
-	}
-
-	// Create a new HTTP Server
-	httpServer := &http.Server{
-		Addr:         fmt.Sprintf(":%d", config.port),
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 10 * time.Second,
 	}
 
 	err = app.startServer()
